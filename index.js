@@ -12,13 +12,12 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xjhllfd.mongodb.net/?retryWrites=true&w=majority`;
-
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
     try{
-        const serviceCollection = client.db('bdTourist').collection('places');
-        const placeCollection = client.db('bdTourist').collection('places');
+        const serviceCollection = client.db('placeBd').collection('places');
+        const placeCollection = client.db('placeBd').collection('places');
 
         app.get('/places', async (req, res) => {
             const query = {}
@@ -37,10 +36,9 @@ async function run(){
         app.get('/places/:id', async (req, res) => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
-            const service = await serviceCollection.findOne(query);
-            res.send(service);   
+            const places = await serviceCollection.findOne(query);
+            res.send(places);   
         })
-
 
     }
     finally{
@@ -50,6 +48,7 @@ async function run(){
 
 run().catch(err => console.error(err));
 
+
 app.get('/', (req, res) => {
     res.send('Bangladesh Travel server is running')
 })
@@ -57,4 +56,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Bangladesh Travel server running on ${port}`);
 })
-
