@@ -18,6 +18,7 @@ async function run(){
     try{
         const serviceCollection = client.db('placeBd').collection('places');
         const placeCollection = client.db('placeBd').collection('places');
+        const reviewCollection = client.db('placeBd').collection('reviews');
 
         app.get('/places', async (req, res) => {
             const query = {}
@@ -38,7 +39,72 @@ async function run(){
             const query = {_id: ObjectId(id)};
             const places = await serviceCollection.findOne(query);
             res.send(places);   
-        })
+        });
+
+        // Reviews API
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const review = await cursor.toArray();
+            res.send(review);
+        });
+
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
+
+        app.delete('/reviews/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        app.get("/reviews/:id", async (req, res) => {
+            try {
+              const { id } = req.params;
+          
+              const product = await reviewCollection.findOne({ _id: ObjectId(id) });
+          
+              res.send({
+                success: true,
+                data: product,
+              });
+            } catch (error) {
+              res.send({
+                success: false,
+                error: error.message,
+              });
+            }
+          });
+          
+          app.patch("/reviews/:id", async (req, res) => {
+            const { id } = req.params;
+          
+            try {
+              const result = await reviewCollection.updateOne({ _id: ObjectId(id) }, { $set: req.body });
+          
+              if (result.matchedCount) {
+                res.send({
+                  success: true,
+                  message: `successfully review updated ${req.body.name}`,
+                });
+              } else {
+                res.send({
+                  success: false,
+                  error: "Couldn't update  the review",
+                });
+              }
+            } catch (error) {
+              res.send({
+                success: false,
+                error: error.message,
+              });
+            }
+          });
+
 
     }
     finally{
